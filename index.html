@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Assistente Virtual</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .chat-container {
+        width: 100%;
+        max-width: 500px;
+        height: 700px;
+        background: #ffffff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* CABEÇALHO */
+
+    .chat-header {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .avatar {
+        width: 50px;
+        height: 50px;
+        background: white;
+        color: #4f46e5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .header-text h1 {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+
+    .header-text p {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    /* ÁREA DAS MENSAGENS */
+
+    .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: #f5f7fb;
+    }
+
+    .message {
+        display: flex;
+        margin-bottom: 15px;
+    }
+
+    .message.bot {
+        justify-content: flex-start;
+    }
+
+    .message.user {
+        justify-content: flex-end;
+    }
+
+    .message-content {
+        max-width: 80%;
+        padding: 12px 16px;
+        border-radius: 16px;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    .bot .message-content {
+        background: white;
+        color: #333;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .user .message-content {
+        background: #4f46e5;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    /* INDICADOR DE DIGITAÇÃO */
+
+    .typing {
+        display: none;
+        margin-bottom: 15px;
+    }
+
+    .typing .message-content {
+        background: white;
+        padding: 14px 18px;
+    }
+
+    .typing span {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        background: #999;
+        border-radius: 50%;
+        margin: 0 2px;
+        animation: typing 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+        }
+
+        30% {
+            transform: translateY(-5px);
+        }
+    }
+
+    /* ÁREA DE DIGITAÇÃO */
+
+    .chat-input-area {
+        padding: 15px;
+        background: white;
+        border-top: 1px solid #eee;
+    }
+
+    .chat-form {
+        display: flex;
+        gap: 10px;
+    }
+
+    #messageInput {
+        flex: 1;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        padding: 13px 18px;
+        font-size: 15px;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    #messageInput:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    #sendButton {
+        width: 48px;
+        height: 48px;
+        border: none;
+        border-radius: 50%;
+        background: #4f46e5;
+        color: white;
+        cursor: pointer;
+        font-size: 20px;
+        transition: 0.2s;
+    }
+
+    #sendButton:hover {
+        background: #3730a3;
+        transform: scale(1.05);
+    }
+
+    #sendButton:disabled {
+        background: #aaa;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* RESPONSIVO */
+
+    @media (max-width: 600px) {
+
+        body {
+            padding: 0;
+        }
+
+        .chat-container {
+            height: 100vh;
+            max-width: none;
+            border-radius: 0;
+        }
+
+        .message-content {
+            max-width: 85%;
+        }
+    }
+</style>
+```
+
+</head>
+
+<body>
+
+```
+<div class="chat-container">
+
+    <!-- CABEÇALHO -->
+
+    <div class="chat-header">
+
+        <div class="avatar">
+            🤖
+        </div>
+
+        <div class="header-text">
+            <h1>Assistente Virtual</h1>
+            <p>Online • Posso ajudar você!</p>
+        </div>
+
+    </div>
+
+
+    <!-- MENSAGENS -->
+
+    <div class="chat-messages" id="chatMessages">
+
+        <div class="message bot">
+            <div class="message-content">
+                Olá! 👋<br><br>
+                Sou o assistente virtual. Como posso ajudar você?
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- INDICADOR DE DIGITAÇÃO -->
+
+    <div class="typing" id="typing">
+
+        <div class="message-content">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </div>
+
+    </div>
+
+
+    <!-- CAMPO DE MENSAGEM -->
+
+    <div class="chat-input-area">
+
+        <form class="chat-form" id="chatForm">
+
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Digite sua mensagem..."
+                autocomplete="off"
+                required
+            >
+
+            <button
+                type="submit"
+                id="sendButton"
+            >
+                ➤
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // Elementos da página
+
+    const chatForm = document.getElementById("chatForm");
+    const messageInput = document.getElementById("messageInput");
+    const chatMessages = document.getElementById("chatMessages");
+    const sendButton = document.getElementById("sendButton");
+    const typing = document.getElementById("typing");
+
+
+    // Adiciona uma mensagem na tela
+
+    function adicionarMensagem(texto, tipo) {
+
+        const message = document.createElement("div");
+
+        message.classList.add("message", tipo);
+
+        const content = document.createElement("div");
+
+        content.classList.add("message-content");
+
+        content.textContent = texto;
+
+        message.appendChild(content);
+
+        chatMessages.appendChild(message);
+
+        // Rola automaticamente para a última mensagem
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+
+    // Mostra o indicador "digitando"
+
+    function mostrarDigitando() {
+
+        typing.style.display = "flex";
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+
+    // Esconde o indicador "digitando"
+
+    function esconderDigitando() {
+
+        typing.style.display = "none";
+    }
+
+
+    // Quando o usuário envia uma mensagem
+
+    chatForm.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const mensagem = messageInput.value.trim();
+
+        // Não envia mensagem vazia
+
+        if (!mensagem) {
+            return;
+        }
+
+
+        // Mostra a mensagem do usuário
+
+        adicionarMensagem(mensagem, "user");
+
+
+        // Limpa o campo
+
+        messageInput.value = "";
+
+
+        // Desativa o botão enquanto espera
+
+        sendButton.disabled = true;
+
+        mostrarDigitando();
+
+
+        try {
+
+            // Envia a mensagem para o Flask
+
+            const resposta = await fetch("/chat", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    mensagem: mensagem
+                })
+
+            });
+
+
+            const dados = await resposta.json();
+
+
+            esconderDigitando();
+
+
+            // Verifica se o Flask retornou uma resposta
+
+            if (dados.resposta) {
+
+                adicionarMensagem(
+                    dados.resposta,
+                    "bot"
+                );
+
+            } else {
+
+                adicionarMensagem(
+                    "Desculpe, não consegui entender.",
+                    "bot"
+                );
+
+            }
+
+        } catch (erro) {
+
+            console.error(erro);
+
+            esconderDigitando();
+
+            adicionarMensagem(
+                "Não foi possível conectar ao servidor.",
+                "bot"
+            );
+
+        }
+
+
+        // Ativa novamente o botão
+
+        sendButton.disabled = false;
+
+        messageInput.focus();
+
+    });
+
+
+    // Deixa o cursor no campo ao abrir a página
+
+    messageInput.focus();
+
+</script>
+```
+
+</body>
+</html>
